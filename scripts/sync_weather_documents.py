@@ -8,7 +8,20 @@ import sys
 from pathlib import Path
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+def _find_project_root(script_file: str | None = None) -> Path:
+    """Locate bundle root when Databricks executes a script without __file__."""
+
+    starts = [Path.cwd().resolve()]
+    if script_file:
+        starts.insert(0, Path(script_file).resolve().parent)
+    for start in starts:
+        for candidate in (start, *start.parents):
+            if (candidate / "weather_repository.py").is_file():
+                return candidate
+    raise RuntimeError("Could not locate weather-intelligence project root")
+
+
+PROJECT_ROOT = _find_project_root(globals().get("__file__"))
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -58,4 +71,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
