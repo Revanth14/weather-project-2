@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weather Intelligence</title>
+  <style>
+    :root {
+      --ink: #132a2e;
+      --muted: #60777a;
+      --paper: #f4f1e8;
+      --card: rgba(255, 255, 255, 0.82);
+      --line: rgba(19, 42, 46, 0.14);
+      --teal: #087f79;
+      --teal-dark: #075e5a;
+      --orange: #e67135;
+      --shadow: 0 24px 70px rgba(29, 62, 62, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 4%, rgba(8, 127, 121, 0.17), transparent 31rem),
+        radial-gradient(circle at 92% 18%, rgba(230, 113, 53, 0.13), transparent 27rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image: linear-gradient(rgba(19, 42, 46, 0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(19, 42, 46, 0.05) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(to bottom, black, transparent 74%);
+    }
+
+    .shell { width: min(1160px, calc(100% - 36px)); margin: 0 auto; padding: 34px 0 70px; position: relative; }
+    nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 56px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -0.03em; }
+    .mark { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: white; background: var(--teal); box-shadow: 0 10px 24px rgba(8,127,121,.25); }
+    .live { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #38a169; box-shadow: 0 0 0 5px rgba(56,161,105,.13); }
+
+    .hero { display: grid; grid-template-columns: 1.35fr .65fr; gap: 48px; align-items: end; margin-bottom: 30px; }
+    .eyebrow { color: var(--teal); font-size: 13px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 13px; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(45px, 7vw, 82px); line-height: .96; letter-spacing: -.055em; margin: 0; max-width: 820px; font-weight: 500; }
+    h1 em { color: var(--teal); font-style: italic; }
+    .lede { color: var(--muted); font-size: 17px; line-height: 1.65; max-width: 470px; margin: 0 0 5px; }
+
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 34px 0 28px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; backdrop-filter: blur(10px); }
+    .stat strong { display: block; font-size: 28px; letter-spacing: -.04em; }
+    .stat span { color: var(--muted); font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+
+    .workspace { display: grid; grid-template-columns: .72fr 1.28fr; gap: 18px; align-items: start; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(14px); }
+    .panel-head { display: flex; justify-content: space-between; gap: 15px; align-items: flex-start; margin-bottom: 20px; }
+    .step { color: var(--orange); font-weight: 850; letter-spacing: .11em; text-transform: uppercase; font-size: 11px; }
+    h2 { margin: 5px 0 0; font-size: 23px; letter-spacing: -.035em; }
+    .chip { border: 1px solid var(--line); padding: 6px 9px; border-radius: 999px; color: var(--muted); font-size: 11px; font-weight: 750; white-space: nowrap; }
+
+    label { display: block; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin: 15px 0 7px; }
+    input, textarea, select { width: 100%; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.7); color: var(--ink); padding: 12px 13px; font: inherit; outline: none; transition: .2s; }
+    textarea { min-height: 112px; resize: vertical; line-height: 1.5; }
+    input:focus, textarea:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(8,127,121,.09); }
+    button { border: 0; width: 100%; border-radius: 13px; color: white; background: var(--teal); padding: 13px 18px; font: inherit; font-weight: 800; cursor: pointer; margin-top: 15px; transition: transform .15s, background .15s; }
+    button:hover { background: var(--teal-dark); transform: translateY(-1px); }
+    button:disabled { opacity: .55; cursor: wait; transform: none; }
+    .help { color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: 10px; }
+    .notice { display: none; margin-top: 15px; border-radius: 12px; padding: 11px 13px; font-size: 13px; line-height: 1.5; background: rgba(8,127,121,.09); color: var(--teal-dark); }
+    .notice.error { background: rgba(185,51,43,.09); color: #8a2e28; }
+
+    .search-row { display: grid; grid-template-columns: 1fr 112px; gap: 10px; }
+    .search-row button { margin: 0; }
+    .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .results { display: grid; gap: 12px; margin-top: 20px; }
+    .empty { color: var(--muted); border: 1px dashed var(--line); padding: 40px 24px; text-align: center; border-radius: 16px; line-height: 1.6; }
+    .result { border: 1px solid var(--line); background: rgba(255,255,255,.62); border-radius: 17px; padding: 18px; animation: rise .35s ease both; }
+    .result-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+    .result h3 { margin: 0; font-size: 17px; line-height: 1.3; letter-spacing: -.025em; }
+    .meta { margin: 7px 0 12px; display: flex; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+    .type { color: var(--teal-dark); background: rgba(8,127,121,.1); border-radius: 99px; padding: 3px 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+    .similarity { color: white; background: var(--orange); padding: 6px 9px; border-radius: 10px; font-weight: 850; font-size: 12px; white-space: nowrap; }
+    .chunk { color: #385257; line-height: 1.6; margin: 0; font-size: 14px; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+
+    @media (max-width: 850px) {
+      .hero, .workspace { grid-template-columns: 1fr; }
+      .hero { gap: 20px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:last-child { grid-column: span 2; }
+    }
+    @media (max-width: 520px) {
+      .shell { width: min(100% - 22px, 1160px); padding-top: 20px; }
+      nav { margin-bottom: 38px; }
+      .stats { gap: 8px; }
+      .stat { padding: 15px; }
+      .panel { padding: 18px; }
+      .filters, .search-row { grid-template-columns: 1fr; }
+      .search-row button { margin-top: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav>
+      <div class="brand"><span class="mark" aria-hidden="true">W</span> Weather Intelligence</div>
+      <div class="live"><span class="dot"></span> Lakebase connected</div>
+    </nav>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">NWS narratives · semantic retrieval</div>
+        <h1>Find the forecast by <em>meaning.</em></h1>
+      </div>
+      <p class="lede">Harvest public weather narratives, embed them in Lakebase with pgvector, and retrieve the conditions that best answer a natural-language question.</p>
+    </section>
+
+    <section class="stats" aria-label="Pipeline status">
+      <div class="stat"><strong id="documents">—</strong><span>Documents</span></div>
+      <div class="stat"><strong id="embeddings">—</strong><span>Embeddings</span></div>
+      <div class="stat"><strong id="locations">—</strong><span>Locations</span></div>
+      <div class="stat"><strong id="alerts">—</strong><span>Alerts</span></div>
+      <div class="stat"><strong id="forecasts">—</strong><span>Forecasts</span></div>
+    </section>
+
+    <section class="workspace">
+      <form class="panel" id="sync-form">
+        <div class="panel-head">
+          <div><span class="step">Step 1</span><h2>Harvest weather</h2></div>
+          <span class="chip">POST /weather/sync</span>
+        </div>
+        <label for="sync-locations">Locations · one per line</label>
+        <textarea id="sync-locations">Chicago, IL
+Austin, TX
+Miami, FL</textarea>
+        <label for="sync-limit">Maximum documents per location</label>
+        <input id="sync-limit" type="number" value="50" min="1" max="100">
+        <button id="sync-button" type="submit">Sync NWS documents</button>
+        <p class="help">After syncing, run the embedding job once. Repeated syncs update existing documents without duplicates.</p>
+        <div class="notice" id="sync-notice" role="status"></div>
+      </form>
+
+      <form class="panel" id="search-form">
+        <div class="panel-head">
+          <div><span class="step">Step 2</span><h2>Semantic search</h2></div>
+          <span class="chip">384-d cosine</span>
+        </div>
+        <label for="query">Ask about weather conditions</label>
+        <div class="search-row">
+          <input id="query" value="flash flood risk this weekend" maxlength="1000" required>
+          <button id="search-button" type="submit">Search</button>
+        </div>
+        <div class="filters">
+          <div>
+            <label for="source-type">Source type</label>
+            <select id="source-type"><option value="">All documents</option><option value="alert">Alerts</option><option value="forecast">Forecasts</option></select>
+          </div>
+          <div>
+            <label for="location-filter">Location contains</label>
+            <input id="location-filter" placeholder="e.g. Chicago">
+          </div>
+        </div>
+        <div class="notice" id="search-notice" role="status"></div>
+        <div class="results" id="results"><div class="empty">Search results will appear here, ranked by pgvector cosine similarity.</div></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const byId = (id) => document.getElementById(id);
+
+    function showNotice(element, message, isError = false) {
+      element.textContent = message;
+      element.classList.toggle("error", isError);
+      element.style.display = "block";
+    }
+
+    async function requestJson(path, options = {}) {
+      const response = await fetch(path, {headers: {"Content-Type": "application/json"}, ...options});
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || `Request failed (${response.status})`);
+      return payload;
+    }
+
+    async function refreshStatus() {
+      try {
+        const status = await requestJson("/weather/status");
+        for (const key of ["documents", "embeddings", "locations", "alerts", "forecasts"]) byId(key).textContent = status[key].toLocaleString();
+      } catch (_) {
+        for (const key of ["documents", "embeddings", "locations", "alerts", "forecasts"]) byId(key).textContent = "—";
+      }
+    }
+
+    byId("sync-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = byId("sync-button");
+      const notice = byId("sync-notice");
+      const locations = byId("sync-locations").value.split(/\n/).map((value) => value.trim()).filter(Boolean);
+      button.disabled = true;
+      showNotice(notice, "Resolving locations and contacting the National Weather Service…");
+      try {
+        const data = await requestJson("/weather/sync", {method: "POST", body: JSON.stringify({locations, limit: Number(byId("sync-limit").value)})});
+        const suffix = data.errors.length ? ` ${data.errors.length} location(s) failed.` : "";
+        showNotice(notice, `Synced ${data.synced} documents across ${data.locations.length} location(s).${suffix}`, data.errors.length > 0);
+        await refreshStatus();
+      } catch (error) {
+        showNotice(notice, error.message, true);
+      } finally { button.disabled = false; }
+    });
+
+    function resultCard(match, index) {
+      const card = document.createElement("article");
+      card.className = "result";
+      card.style.animationDelay = `${Math.min(index * 45, 250)}ms`;
+      const top = document.createElement("div"); top.className = "result-top";
+      const heading = document.createElement("h3"); heading.textContent = match.headline;
+      const score = document.createElement("span"); score.className = "similarity"; score.textContent = `${(match.similarity * 100).toFixed(1)}% match`;
+      top.append(heading, score);
+      const meta = document.createElement("div"); meta.className = "meta";
+      const type = document.createElement("span"); type.className = "type"; type.textContent = match.source_type;
+      const place = document.createElement("span"); place.textContent = match.location;
+      const time = document.createElement("span"); time.textContent = match.effective_at ? new Date(match.effective_at).toLocaleString() : "Time unavailable";
+      meta.append(type, place, time);
+      const text = document.createElement("p"); text.className = "chunk"; text.textContent = match.chunk_text;
+      card.append(top, meta, text);
+      return card;
+    }
+
+    byId("search-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = byId("search-button");
+      const notice = byId("search-notice");
+      const results = byId("results");
+      button.disabled = true;
+      showNotice(notice, "Embedding the query and searching Lakebase…");
+      try {
+        const data = await requestJson("/weather/search", {method: "POST", body: JSON.stringify({query: byId("query").value, top_k: 5, source_type: byId("source-type").value || null, location: byId("location-filter").value || null})});
+        results.replaceChildren();
+        if (!data.matches.length) {
+          const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = data.message;
+          results.append(empty);
+        } else data.matches.forEach((match, index) => results.append(resultCard(match, index)));
+        showNotice(notice, `Returned ${data.count} ranked result(s) using ${data.model}.`);
+      } catch (error) {
+        showNotice(notice, error.message, true);
+      } finally { button.disabled = false; }
+    });
+
+    refreshStatus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+bundle:
+  name: weather-intelligence
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+  prod:
+    mode: production
+
