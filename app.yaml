@@ -1,14 +1,6 @@
 command:
-  - gunicorn
-  - app:app
-  - --bind
-  - 0.0.0.0:${DATABRICKS_APP_PORT}
-  - --workers
-  - "1"
-  - --threads
-  - "4"
-  - --timeout
-  - "180"
+  - python
+  - run_app.py
 
 env:
   - name: LAKEBASE_SECRET_SCOPE
