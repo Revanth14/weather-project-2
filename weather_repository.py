@@ -113,7 +113,15 @@ def upsert_documents(documents: Sequence[dict[str, Any]]) -> int:
             synced_at = now()
     """
     with lakebase.get_connection() as conn, conn.cursor() as cursor:
-        execute_values(cursor, sql, values, page_size=200)
+        execute_values(
+            cursor,
+            sql,
+            values,
+            template=(
+                "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())"
+            ),
+            page_size=200,
+        )
         conn.commit()
     return len(documents)
 
