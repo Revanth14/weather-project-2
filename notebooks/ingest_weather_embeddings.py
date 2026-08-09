@@ -1,4 +1,3 @@
-# Databricks notebook source
 """Batch weather chunking and embedding job using psycopg2 only.
 
 This file can run as a normal Python script or as a Databricks Python task.
@@ -134,4 +133,3 @@ if __name__ == "__main__":
         max_documents=arguments.max_documents,
     )
     print(json.dumps({"event": "embedding_run_complete", **summary}, indent=2))
-
